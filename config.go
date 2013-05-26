@@ -41,6 +41,18 @@ func NewConfig() (*Config, error) {
 	return cfg, nil
 }
 
-func (c *Config) GetValue(key string) string {
-	return c.keys[key]
+func (c *Config) GetString(key string, defaultvalue string) string {
+	return ToString(c.keys[key], defaultvalue)
+}
+
+func (c *Config) GetInt(key string, defaultvalue int) int {
+	return ToInt(c.keys[key], defaultvalue)
+}
+
+func (c *Config) GetBool(key string, defaultvalue bool) bool {
+	return ToBool(c.keys[key], defaultvalue)
+}
+
+func (c *Config) GetMap() map[string]string {
+	return c.keys
 }

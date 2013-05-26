@@ -4,6 +4,13 @@ import (
 	"strconv"
 )
 
+func ToString(str string, defaultvalue string) string {
+	if str == "" {
+		return defaultvalue
+	}
+	return str
+}
+
 func ToInt(str string, defaultvalue int) int {
 	val, err := strconv.Atoi(str)
 	if err != nil {
