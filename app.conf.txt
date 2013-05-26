@@ -1,0 +1,13 @@
+[Mysql]
+dbconn = root:123@tcp(127.0.0.1:3306)/base?charset=utf8
+minpoolsize = 50
+maxpoolsize = 100
+
+[Redis]
+redisconn =
+
+[QQOauth]
+appid = 
+appkey = 
+redirecturl = 
+authorizeurl = https://graph.qq.com/oauth2.0/authorize
