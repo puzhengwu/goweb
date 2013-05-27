@@ -77,42 +77,34 @@ func (s *Server) addRoute(r string, method string, handler interface{}) {
 	}
 }
 
-// ServeHTTP is the interface method for Go's http server package
 func (s *Server) ServeHTTP(c http.ResponseWriter, req *http.Request) {
 	s.Process(c, req)
 }
 
-// Process invokes the routing system for server s
 func (s *Server) Process(c http.ResponseWriter, req *http.Request) {
 	s.routeHandler(req, c)
 }
 
-// Get adds a handler for the 'GET' http method for server s.
 func (s *Server) Get(route string, handler interface{}) {
 	s.addRoute(route, "GET", handler)
 }
 
-// Post adds a handler for the 'POST' http method for server s.
 func (s *Server) Post(route string, handler interface{}) {
 	s.addRoute(route, "POST", handler)
 }
 
-// Put adds a handler for the 'PUT' http method for server s.
 func (s *Server) Put(route string, handler interface{}) {
 	s.addRoute(route, "PUT", handler)
 }
 
-// Delete adds a handler for the 'DELETE' http method for server s.
 func (s *Server) Delete(route string, handler interface{}) {
 	s.addRoute(route, "DELETE", handler)
 }
 
-// Match adds a handler for an arbitrary http method for server s.
 func (s *Server) Match(method string, route string, handler interface{}) {
 	s.addRoute(route, method, handler)
 }
 
-// Run starts the web application and serves HTTP requests for s
 func (s *Server) Run(addr string) {
 	s.initServer()
 
@@ -136,21 +128,18 @@ func (s *Server) Run(addr string) {
 	s.l.Close()
 }
 
-// RunFcgi starts the web application and serves FastCGI requests for s.
 func (s *Server) RunFcgi(addr string) {
 	s.initServer()
 	s.Logger.Printf("web.go serving fcgi %s\n", addr)
 	s.listenAndServeFcgi(addr)
 }
 
-// RunScgi starts the web application and serves SCGI requests for s.
 func (s *Server) RunScgi(addr string) {
 	s.initServer()
 	s.Logger.Printf("web.go serving scgi %s\n", addr)
 	s.listenAndServeScgi(addr)
 }
 
-// RunTLS starts the web application and serves HTTPS requests for s.
 func (s *Server) RunTLS(addr string, config *tls.Config) error {
 	s.initServer()
 	mux := http.NewServeMux()
@@ -165,14 +154,12 @@ func (s *Server) RunTLS(addr string, config *tls.Config) error {
 	return http.Serve(s.l, mux)
 }
 
-// Close stops server s.
 func (s *Server) Close() {
 	if s.l != nil {
 		s.l.Close()
 	}
 }
 
-// safelyCall invokes `function` in recover block
 func (s *Server) safelyCall(function reflect.Value, args []reflect.Value) (resp []reflect.Value, e interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -196,8 +183,6 @@ func (s *Server) safelyCall(function reflect.Value, args []reflect.Value) (resp 
 	return function.Call(args), nil
 }
 
-// requiresContext determines whether 'handlerType' contains
-// an argument to 'web.Ctx' as its first argument
 func requiresContext(handlerType reflect.Type) bool {
 	//if the method doesn't take arguments, no
 	if handlerType.NumIn() == 0 {
@@ -217,12 +202,6 @@ func requiresContext(handlerType reflect.Type) bool {
 	return false
 }
 
-// tryServingFile attempts to serve a static file, and returns
-// whether or not the operation is successful.
-// It checks the following directories for the file, in order:
-// 1) Config.StaticDir
-// 2) The 'static' directory in the parent directory of the executable.
-// 3) The 'static' directory in the current working directory
 func (s *Server) tryServingFile(name string, req *http.Request, w http.ResponseWriter) bool {
 	//try to serve a static file
 	if s.Config.StaticDir != "" {

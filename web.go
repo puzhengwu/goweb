@@ -174,7 +174,6 @@ func (ctx *Context) GetSecureCookie(name string) (string, bool) {
 }
 
 var contextType reflect.Type
-
 var defaultStaticDirs []string
 
 func init() {
@@ -196,69 +195,52 @@ func init() {
 	return
 }
 
-// Process invokes the main server's routing system.
 func Process(c http.ResponseWriter, req *http.Request) {
 	mainServer.Process(c, req)
 }
 
-// Run starts the web application and serves HTTP requests for the main server.
 func Run(addr string) {
 	mainServer.Run(addr)
 }
 
-// RunTLS starts the web application and serves HTTPS requests for the main server.
 func RunTLS(addr string, config *tls.Config) {
 	mainServer.RunTLS(addr, config)
 }
 
-// RunScgi starts the web application and serves SCGI requests for the main server.
 func RunScgi(addr string) {
 	mainServer.RunScgi(addr)
 }
 
-// RunFcgi starts the web application and serves FastCGI requests for the main server.
 func RunFcgi(addr string) {
 	mainServer.RunFcgi(addr)
 }
 
-// Close stops the main server.
 func Close() {
 	mainServer.Close()
 }
 
-// Get adds a handler for the 'GET' http method in the main server.
 func Get(route string, handler interface{}) {
 	mainServer.Get(route, handler)
 }
 
-// Post adds a handler for the 'POST' http method in the main server.
 func Post(route string, handler interface{}) {
 	mainServer.addRoute(route, "POST", handler)
 }
 
-// Put adds a handler for the 'PUT' http method in the main server.
 func Put(route string, handler interface{}) {
 	mainServer.addRoute(route, "PUT", handler)
 }
 
-// Delete adds a handler for the 'DELETE' http method in the main server.
 func Delete(route string, handler interface{}) {
 	mainServer.addRoute(route, "DELETE", handler)
 }
 
-// Match adds a handler for an arbitrary http method in the main server.
 func Match(method string, route string, handler interface{}) {
 	mainServer.addRoute(route, method, handler)
 }
 
-// SetLogger sets the logger for the main server.
 func SetLogger(logger *log.Logger) {
 	mainServer.Logger = logger
-}
-
-// Config is the configuration of the main server.
-var DefaultConfig = &ServerConfig{
-	RecoverPanic: true,
 }
 
 var mainServer = NewServer()
