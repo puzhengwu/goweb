@@ -17,7 +17,6 @@ import (
 	"time"
 )
 
-// ServerConfig is configuration for server objects.
 type ServerConfig struct {
 	StaticDir    string
 	CookieDomain string
@@ -26,19 +25,21 @@ type ServerConfig struct {
 	Profiler     bool
 }
 
-// Server represents a web.go server.
 type Server struct {
 	Config *ServerConfig
 	routes []route
 	Logger *log.Logger
 	Env    map[string]interface{}
-	//save the listener so it can be closed
-	l net.Listener
+	l      net.Listener
 }
 
-func NewServer() *Server {
+func NewServer(config *Config) *Server {
 	return &Server{
-		Config: DefaultConfig,
+		Config: &ServerConfig{StaticDir: config.GetString("staticdir", ""),
+			CookieDomain: config.GetString("cookiedomain", ""),
+			CookieSecret: config.GetString("cookiesecret", ""),
+			RecoverPanic: config.GetBool("recoverpanic", true),
+			Profiler:     config.GetBool("profiler", false)},
 		Logger: log.New(os.Stdout, "", log.Ldate|log.Ltime),
 		Env:    map[string]interface{}{},
 	}

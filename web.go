@@ -243,4 +243,5 @@ func SetLogger(logger *log.Logger) {
 	mainServer.Logger = logger
 }
 
-var mainServer = NewServer()
+var config, err = NewConfig()
+var mainServer = NewServer(config)
