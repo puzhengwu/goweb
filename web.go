@@ -1,5 +1,3 @@
-// Package web is a lightweight web framework for Go. It's ideal for
-// writing simple, performant backend web services.
 package goweb
 
 import (
@@ -23,10 +21,6 @@ import (
 	"time"
 )
 
-// A Context object is created for every incoming HTTP request, and is
-// passed to handlers as an optional first argument. It provides information
-// about the request, including the http.Request object, the GET and POST params,
-// and acts as a Writer for the response.
 type Context struct {
 	Request *http.Request
 	Params  map[string]string
@@ -34,33 +28,25 @@ type Context struct {
 	http.ResponseWriter
 }
 
-// WriteString writes string data into the response object.
 func (ctx *Context) WriteString(content string) {
 	ctx.ResponseWriter.Write([]byte(content))
 }
 
-// Abort is a helper method that sends an HTTP header and an optional
-// body. It is useful for returning 4xx or 5xx errors.
-// Once it has been called, any return value from the handler will
-// not be written to the response.
 func (ctx *Context) Abort(status int, body string) {
 	ctx.ResponseWriter.WriteHeader(status)
 	ctx.ResponseWriter.Write([]byte(body))
 }
 
-// Redirect is a helper method for 3xx redirects.
 func (ctx *Context) Redirect(status int, url_ string) {
 	ctx.ResponseWriter.Header().Set("Location", url_)
 	ctx.ResponseWriter.WriteHeader(status)
 	ctx.ResponseWriter.Write([]byte("Redirecting to: " + url_))
 }
 
-// Notmodified writes a 304 HTTP response
 func (ctx *Context) NotModified() {
 	ctx.ResponseWriter.WriteHeader(304)
 }
 
-// NotFound writes a 404 HTTP response
 func (ctx *Context) NotFound(message string) {
 	ctx.ResponseWriter.WriteHeader(404)
 	ctx.ResponseWriter.Write([]byte(message))
@@ -96,11 +82,6 @@ func (ctx *Context) ToXml(o interface{}) {
 	ctx.ResponseWriter.Write(content)
 }
 
-// ContentType sets the Content-Type header for an HTTP response.
-// For example, ctx.ContentType("json") sets the content-type to "application/json"
-// If the supplied value contains a slash (/) it is set as the Content-Type
-// verbatim. The return value is the content type as it was
-// set, or an empty string if none was found.
 func (ctx *Context) ContentType(val string) string {
 	var ctype string
 	if strings.ContainsRune(val, '/') {
@@ -117,8 +98,6 @@ func (ctx *Context) ContentType(val string) string {
 	return ctype
 }
 
-// SetHeader sets a response header. If `unique` is true, the current value
-// of that header will be overwritten . If false, it will be appended.
 func (ctx *Context) SetHeader(hdr string, val string, unique bool) {
 	if unique {
 		ctx.Header().Set(hdr, val)
@@ -127,8 +106,7 @@ func (ctx *Context) SetHeader(hdr string, val string, unique bool) {
 	}
 }
 
-// SetCookie adds a cookie header to the response.
-func (ctx *Context) SetCookie(cookie *http.Cookie) {
+func (ctx *Context) setCookie(cookie *http.Cookie) {
 	ctx.SetHeader("Set-Cookie", cookie.String(), false)
 }
 
@@ -140,6 +118,10 @@ func getCookieSig(key string, val []byte, timestamp string) string {
 
 	hex := fmt.Sprintf("%02x", hm.Sum(nil))
 	return hex
+}
+
+func (ctx *Context) SetCookie(name string, val string, age int64) {
+	ctx.setCookie(NewCookie(name, val, age, ctx.Server.Config.CookieDomain))
 }
 
 func (ctx *Context) SetSecureCookie(name string, val string, age int64) {
@@ -157,7 +139,7 @@ func (ctx *Context) SetSecureCookie(name string, val string, age int64) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sig := getCookieSig(ctx.Server.Config.CookieSecret, vb, timestamp)
 	cookie := strings.Join([]string{vs, timestamp, sig}, "|")
-	ctx.SetCookie(NewCookie(name, cookie, age))
+	ctx.setCookie(NewCookie(name, cookie, age, ctx.Server.Config.CookieDomain))
 }
 
 func (ctx *Context) GetSecureCookie(name string) (string, bool) {
@@ -191,14 +173,13 @@ func (ctx *Context) GetSecureCookie(name string) (string, bool) {
 	return "", false
 }
 
-// small optimization: cache the context type instead of repeteadly calling reflect.Typeof
 var contextType reflect.Type
 
 var defaultStaticDirs []string
 
 func init() {
 	contextType = reflect.TypeOf(Context{})
-	//find the location of the exe file
+
 	wd, _ := os.Getwd()
 	arg0 := path.Clean(os.Args[0])
 
@@ -206,10 +187,10 @@ func init() {
 	if strings.HasPrefix(arg0, "/") {
 		exeFile = arg0
 	} else {
-		//TODO for robustness, search each directory in $PATH
 		exeFile = path.Join(wd, arg0)
 	}
 	parent, _ := path.Split(exeFile)
+	fmt.Println(parent, wd)
 	defaultStaticDirs = append(defaultStaticDirs, path.Join(parent, "static"))
 	defaultStaticDirs = append(defaultStaticDirs, path.Join(wd, "static"))
 	return

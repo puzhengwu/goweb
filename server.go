@@ -20,8 +20,7 @@ import (
 // ServerConfig is configuration for server objects.
 type ServerConfig struct {
 	StaticDir    string
-	Addr         string
-	Port         int
+	CookieDomain string
 	CookieSecret string
 	RecoverPanic bool
 	Profiler     bool
