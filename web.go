@@ -276,7 +276,7 @@ func SetLogger(logger *log.Logger) {
 }
 
 // Config is the configuration of the main server.
-var Config = &ServerConfig{
+var DefaultConfig = &ServerConfig{
 	RecoverPanic: true,
 }
 

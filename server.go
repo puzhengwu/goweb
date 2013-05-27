@@ -39,7 +39,7 @@ type Server struct {
 
 func NewServer() *Server {
 	return &Server{
-		Config: Config,
+		Config: DefaultConfig,
 		Logger: log.New(os.Stdout, "", log.Ldate|log.Ltime),
 		Env:    map[string]interface{}{},
 	}
