@@ -2,7 +2,6 @@ package goweb
 
 import (
 	"bytes"
-	"net/http"
 	"net/url"
 	"os"
 	"regexp"
@@ -91,19 +90,4 @@ func Slug(s string, sep string) string {
 	sepEnds := regexp.MustCompile("^" + quoted + "|" + quoted + "$")
 	slug = sepEnds.ReplaceAllString(slug, "")
 	return strings.ToLower(slug)
-}
-
-func NewCookie(name string, value string, age int64, domain string) *http.Cookie {
-	var utctime time.Time
-	if age == 0 {
-		// 2^31 - 1 seconds (roughly 2038)
-		utctime = time.Unix(2147483647, 0)
-	} else {
-		utctime = time.Unix(time.Now().Unix()+age, 0)
-	}
-	if domain == "" {
-		return &http.Cookie{Name: name, Value: value, Expires: utctime}
-	} else {
-		return &http.Cookie{Name: name, Value: value, Expires: utctime, Domain: domain}
-	}
 }

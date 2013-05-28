@@ -36,11 +36,11 @@ type Server struct {
 func NewServer(config *Config) *Server {
 	return &Server{
 		Config: &ServerConfig{
-			StaticDir: config.GetString("staticdir", ""),
-			//CookieDomain: config.GetString("cookiedomain", ""),
-			//CookieSecret: config.GetString("cookiesecret", ""),
-			//RecoverPanic: config.GetBool("recoverpanic", true),
-			//Profiler:     config.GetBool("profiler", false),
+			StaticDir:    config.GetString("staticdir", ""),
+			CookieDomain: config.GetString("cookiedomain", ""),
+			CookieSecret: config.GetString("cookiesecret", ""),
+			RecoverPanic: config.GetBool("recoverpanic", true),
+			Profiler:     config.GetBool("profiler", false),
 		},
 		Logger: log.New(os.Stdout, "", log.Ldate|log.Ltime),
 		Env:    map[string]interface{}{},

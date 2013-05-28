@@ -107,7 +107,7 @@ func (ctx *Context) SetHeader(hdr string, val string, unique bool) {
 }
 
 func (ctx *Context) setCookie(cookie *http.Cookie) {
-	ctx.SetHeader("Set-Cookie", cookie.String(), false)
+	ctx.SetHeader("Set-Cookie", cookie.String(), true)
 }
 
 func getCookieSig(key string, val []byte, timestamp string) string {
@@ -120,11 +120,19 @@ func getCookieSig(key string, val []byte, timestamp string) string {
 	return hex
 }
 
-func (ctx *Context) SetCookie(name string, val string, age int64) {
-	ctx.setCookie(NewCookie(name, val, age, ctx.Server.Config.CookieDomain))
+func newCookie(name string, value string, age int, domain string) *http.Cookie {
+	if domain == "" {
+		return &http.Cookie{Name: name, Value: value, MaxAge: age}
+	} else {
+		return &http.Cookie{Name: name, Value: value, MaxAge: age, Domain: domain}
+	}
 }
 
-func (ctx *Context) SetSecureCookie(name string, val string, age int64) {
+func (ctx *Context) SetCookie(name string, val string, age int) {
+	ctx.setCookie(newCookie(name, val, age, ctx.Server.Config.CookieDomain))
+}
+
+func (ctx *Context) SetSecureCookie(name string, val string, age int) {
 	//base64 encode the val
 	if len(ctx.Server.Config.CookieSecret) == 0 {
 		ctx.Server.Logger.Println("Secret Key for secure cookies has not been set. Please assign a cookie secret to web.Config.CookieSecret.")
@@ -139,7 +147,7 @@ func (ctx *Context) SetSecureCookie(name string, val string, age int64) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sig := getCookieSig(ctx.Server.Config.CookieSecret, vb, timestamp)
 	cookie := strings.Join([]string{vs, timestamp, sig}, "|")
-	ctx.setCookie(NewCookie(name, cookie, age, ctx.Server.Config.CookieDomain))
+	ctx.setCookie(newCookie(name, cookie, age, ctx.Server.Config.CookieDomain))
 }
 
 func (ctx *Context) GetSecureCookie(name string) (string, bool) {
@@ -175,6 +183,7 @@ func (ctx *Context) GetSecureCookie(name string) (string, bool) {
 
 var contextType reflect.Type
 var defaultStaticDirs []string
+var mainServer *Server
 
 func init() {
 	contextType = reflect.TypeOf(Context{})
@@ -189,9 +198,15 @@ func init() {
 		exeFile = path.Join(wd, arg0)
 	}
 	parent, _ := path.Split(exeFile)
-	fmt.Println(parent, wd)
 	defaultStaticDirs = append(defaultStaticDirs, path.Join(parent, "static"))
 	defaultStaticDirs = append(defaultStaticDirs, path.Join(wd, "static"))
+
+	var config, err = NewConfig()
+	if err != nil {
+		//fmt.Println("app.conf not found!")
+		panic(err)
+	}
+	mainServer = NewServer(config)
 	return
 }
 
@@ -242,6 +257,3 @@ func Match(method string, route string, handler interface{}) {
 func SetLogger(logger *log.Logger) {
 	mainServer.Logger = logger
 }
-
-var config, err = NewConfig()
-var mainServer = NewServer(config)
