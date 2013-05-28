@@ -121,11 +121,7 @@ func getCookieSig(key string, val []byte, timestamp string) string {
 }
 
 func newCookie(name string, value string, age int, domain string) *http.Cookie {
-	if domain == "" {
-		return &http.Cookie{Name: name, Value: value, MaxAge: age}
-	} else {
-		return &http.Cookie{Name: name, Value: value, MaxAge: age, Domain: domain}
-	}
+	return &http.Cookie{Name: name, Value: value, MaxAge: age, Domain: domain}
 }
 
 func (ctx *Context) SetCookie(name string, val string, age int) {
